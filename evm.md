@@ -52,7 +52,7 @@ In the comments next to each cell, we've marked which component of the YellowPap
           <touchedAccounts> .Set        </touchedAccounts>
 
           <callState>
-            <program>      .Map       </program>            // I_b
+            <program>      .IMap       </program>            // I_b
             <programBytes> .WordStack </programBytes>
 
             // I_*
@@ -804,23 +804,23 @@ Lists of opcodes form programs.
 ### Converting to/from `Map` Representation
 
 ```k
-    syntax Map ::= #asMapOpCodes ( OpCodes )             [function]
-                 | #asMapOpCodes ( Int , OpCodes , Map ) [function, klabel(#asMapOpCodesAux)]
+    syntax IMap ::= #asMapOpCodes ( OpCodes )              [function]
+                  | #asMapOpCodes ( Int , OpCodes , IMap ) [function, klabel(#asMapOpCodesAux)]
  // -----------------------------------------------------------------------------------------
-    rule #asMapOpCodes( OPS::OpCodes ) => #asMapOpCodes(0, OPS, .Map)
+    rule #asMapOpCodes( OPS::OpCodes ) => #asMapOpCodes(0, OPS, .IMap)
 
-    rule #asMapOpCodes( N , .OpCodes         , MAP ) => MAP
-    rule #asMapOpCodes( N , OP:OpCode  ; OCS , MAP ) => #asMapOpCodes(N +Int 1, OCS, MAP (N |-> OP)) requires notBool isPushOp(OP)
-    rule #asMapOpCodes( N , PUSH(M, W) ; OCS , MAP ) => #asMapOpCodes(N +Int 1 +Int M, OCS, MAP (N |-> PUSH(M, W)))
+    rule #asMapOpCodes( N , .OpCodes         , IMAP ) => IMAP
+    rule #asMapOpCodes( N , OP:OpCode  ; OCS , IMAP ) => #asMapOpCodes(N +Int 1, OCS, store(IMAP, N, OP)) requires notBool isPushOp(OP)
+    rule #asMapOpCodes( N , PUSH(M, W) ; OCS , IMAP ) => #asMapOpCodes(N +Int 1 +Int M, OCS, store(IMAP, N, PUSH(M, W)))
 
-    syntax OpCodes ::= #asOpCodes ( Map )                 [function]
-                     | #asOpCodes ( Int , Map , OpCodes ) [function, klabel(#asOpCodesAux)]
+    syntax OpCodes ::= #asOpCodes ( IMap )                 [function]
+                     | #asOpCodes ( Int , IMap , OpCodes ) [function, klabel(#asOpCodesAux)]
  // ---------------------------------------------------------------------------------------
     rule #asOpCodes(M) => #asOpCodes(0, M, .OpCodes)
 
-    rule #asOpCodes(N, .Map,               OPS) => OPS
-    rule #asOpCodes(N, N |-> OP         M, OPS) => #asOpCodes(N +Int 1,        M, OP         ; OPS) requires notBool isPushOp(OP)
-    rule #asOpCodes(N, N |-> PUSH(S, W) M, OPS) => #asOpCodes(N +Int 1 +Int S, M, PUSH(S, W) ; OPS)
+    rule #asOpCodes(N, .IMap,                    OPS) => OPS
+    rule #asOpCodes(N, store(M, N, OP:OpCode),   OPS) => #asOpCodes(N +Int 1, M, OP ; OPS) requires notBool isPushOp(OP)
+    rule #asOpCodes(N, store(M, N, PUSH(S, W)) , OPS) => #asOpCodes(N +Int 1 +Int S, M, PUSH(S, W) ; OPS)
 ```
 
 EVM OpCodes
