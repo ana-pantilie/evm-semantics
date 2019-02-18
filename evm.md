@@ -32,7 +32,7 @@ In the comments next to each cell, we've marked which component of the YellowPap
       <exit-code exit=""> 1 </exit-code>
       <mode> $MODE:Mode </mode>
       <schedule> $SCHEDULE:Schedule </schedule>
-      <analysis> .Map </analysis>
+      <analysis> .Set </analysis>
 
       <ethereum>
 
@@ -446,7 +446,10 @@ The `#next` operator executes a single step by:
  // --------------------------------------------
     rule <k> #exec [ IOP:InvalidOp ] => IOP ... </k>
 
-    rule <k> #exec [ OP ] => #gas [ OP ] ~> OP ... </k> requires isInternalOp(OP) orBool isNullStackOp(OP) orBool isPushOp(OP)
+    rule <k> #exec [ OP ] => #gas [ OP ] ~> OP ... </k> 
+         <analysis> PCS:Set (.Set => SetItem(PCOUNT)) </analysis>
+         <pc> PCOUNT </pc>
+        requires isInternalOp(OP) orBool isNullStackOp(OP) orBool isPushOp(OP)
 ```
 
 Here we load the correct number of arguments from the `wordStack` based on the sort of the opcode.
