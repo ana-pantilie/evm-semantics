@@ -18,6 +18,14 @@ def test_parse_kmap2():
     test_map = json.loads(test_map_json2)
     print(parse_kmap(test_map).keys())
 
+def test_parse_konfig():
+    with open('testing-json-out.log') as koutput:
+        koutput_dict = json.load(koutput)
+        analysis_contents = get_analysis_cell_contents(koutput_dict)
+        analysis_dict = parse_kmap(analysis_contents)
+        print(parse_kset(analysis_dict['"coverage"']))
+        print(list(parse_kmap(analysis_dict['"currentProgram"']).keys()))
+
 def parse_kset(set_obj):
     setitem1 = set_obj['args'][0]['args'][0]['token']
     if set_obj['args'][1]['label'] == 'SetItem':
@@ -37,5 +45,7 @@ def parse_kmap(map_obj):
         return cur_dict
     return {**cur_dict, **parse_kmap(map_obj['args'][1])}
 
-
-
+def get_analysis_cell_contents(konfig_obj):
+    return [x['args'][0]
+            for x in konfig_obj['term']['args']
+            if x['label'] == '<analysis>'][0]
